@@ -1,0 +1,67 @@
+
+
+spring:
+  application:
+    name: yt2spotify-transfer # Added application name
+
+  datasource:
+    url: jdbc:postgresql://localhost:5000/db
+    username: ${DB_USERNAME:admin_user}
+    password: ${DB_PASSWORD:password}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          spotify:
+            client-id: ${SPOTIFY_CLIENT_ID}
+            client-secret: ${SPOTIFY_CLIENT_SECRET}
+            scope:
+              - user-read-private     # Needed for getting user ID (/me)
+              - user-read-email     # For user linking/info
+              - playlist-modify-public  # To create/add to public playlists
+              - playlist-modify-private # To create/add to private playlists
+              - playlist-read-private # Not strictly needed for writing, but good to have
+              - playlist-read-collaborative # If dealing with shared playlists later
+            authorization-grant-type: authorization_code
+            redirect-uri: http://localhost:8080/login/oauth2/code/spotify
+            provider: spotify
+
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - openid
+              - profile
+              - email
+              - https://www.googleapis.com/auth/youtube
+            authorization-grant-type: authorization_code
+            redirect-uri: http://localhost:8080/login/oauth2/code/google
+
+        provider:
+          spotify:
+            authorization-uri: https://accounts.spotify.com/authorize
+            token-uri: https://accounts.spotify.com/api/token
+            user-info-uri: https://api.spotify.com/v1/me
+            user-name-attribute: id
+
+
+logging:
+  level:
+    root: INFO
+    com.nexon.yt2spotify: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
+
+server:
+  port: 8080
